@@ -31,7 +31,7 @@ public class A3App implements SceneGraphNode {
 	 */
 	public static void main(String[] args){
 		// TODO: Add your name and student number to the window title and source files
-	    String windowTitle = "Bezier Patch Drawer (YOUR NAME AND STUDENT NUMBER HERE)";
+	    String windowTitle = "Bezier Patch Drawer (Mike Gao @ 260915701)";
 	    SceneGraphNode scene = new A3App();
 	    Dimension glWindowSize = new Dimension(512,256);
 	    Dimension controlWindowSize = new Dimension(640,640);
