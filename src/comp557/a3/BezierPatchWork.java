@@ -19,6 +19,7 @@ import com.jogamp.opengl.util.GLBuffers;
 
 import mintools.parameters.IntParameter;
 import mintools.viewer.ShadowPipeline;
+import mintools.viewer.geom.Sphere;
 
 /**
  * BezierMesh is a class for loads a collection of Bezier patches and displaying them using OpenGL.
@@ -56,8 +57,17 @@ public class BezierPatchWork {
     	pipeline.setkd(drawable, 0.0, 0.9, 0.0 );
 
     	// TODO: Objective 1: Draw the control points of the selected patch (so that you can draw all of them)
+		for(int j = 0; j < 4; ++j){
+			for(int k = 0; k < 4; ++k) {
+				pipeline.push();
+				pipeline.translate(drawable, coordinatePatch[patch][0].getElement(j,k), coordinatePatch[patch][1].getElement(j,k), coordinatePatch[patch][2].getElement(j,k));
+				pipeline.scale(drawable, 0.05, 0.05, 0.05);
+				Sphere.draw(drawable, pipeline);
+				pipeline.pop(drawable);
+			}
+		}
 
-    	
+
     }
     
     FloatBuffer vertexBuffer;
