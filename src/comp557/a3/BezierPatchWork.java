@@ -7,6 +7,7 @@ package comp557.a3;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -310,22 +311,56 @@ public class BezierPatchWork {
 
 		return result;
 	}
-	
+
+
+	private Vector3d evalBezierCurve(Vector3d[] v, double t) {
+		v[0].scale(-3 * (1 - t) * (1 - t));
+		v[1].scale(3 * (1 - t) * (1 - t) - 6 * t * (1 - t));
+		v[2].scale(6 * t * (1 - t) - 3 * t * t);
+		v[3].scale(3 * t * t);
+		Vector3d result = new Vector3d();
+		result.add(v[0]);
+		result.add(v[1]);
+		result.add(v[2]);
+		result.add(v[3]);
+		return result;
+	}
 	/**
 	 *  differentiates the Bezier mesh along the parametric 's' direction
 	 */
 	private Vector3d differentiateS(double s,double t,int patch) {
 		// TODO: Objective 3: Evaluate the surface derivative in the s direction
-		
-		return new Vector3d();
+		Vector3d[] curveS = new Vector3d[4];
+		for (int i = 0; i < 4; ++i) {
+			Vector3d[] tmp = new Vector3d[4];
+			for (int j = 0; j < 4; ++j) {
+				tmp[j] = new Vector3d();
+				tmp[j].x = coordinatePatch[patch][0].getElement(i,j);
+				tmp[j].y = coordinatePatch[patch][1].getElement(i,j);
+				tmp[j].z = coordinatePatch[patch][2].getElement(i,j);
+			}
+			curveS[i] = evalBezierCurve(tmp, t);
+		}
+		return evalBezierCurve(curveS, s);
 	}
 	/**
 	 *  differentiates the Bezier mesh along the parametric 't' direction
 	 */
 	private Vector3d differentiateT(double s,double t,int patch) {
 		// TODO: Objective 3: Evaluate the surface derivative in the t direction
+		Vector3d[] curveT = new Vector3d[4];
+		for (int i = 0; i < 4; ++i) {
+			Vector3d[] tmp = new Vector3d[4];
+			for (int j = 0; j < 4; ++j) {
+				tmp[j] = new Vector3d();
+				tmp[j].x = coordinatePatch[patch][0].getElement(i,j);
+				tmp[j].y = coordinatePatch[patch][1].getElement(i,j);
+				tmp[j].z = coordinatePatch[patch][2].getElement(i,j);
+			}
+			curveT[i] = evalBezierCurve(tmp, s);
+		}
+		return evalBezierCurve(curveT, t);
 
-		return new Vector3d();
 	}
 	
 	
