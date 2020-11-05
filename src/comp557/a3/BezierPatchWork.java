@@ -278,15 +278,37 @@ public class BezierPatchWork {
 			e.printStackTrace();
 		}
 	}		
-	
+
+	private int fact(int n) {
+		int result = 1;
+		for (int i = n; i > 1; --i) {
+			result *= i;
+		}
+		return result;
+	}
+
+	private double bernsteinPoly(int i, int n, double u) {
+		double binomialCoeff = fact(n) / ( fact(i) * fact(n-i));
+		return binomialCoeff * Math.pow(u,i) * Math.pow(1-u, n-i);
+	}
+
 	/**
 	 *  returns the xyz coordinates of the Bezier mesh at the parametric point (s,t)
 	 */
 	private Vector3d evaluateCoordinate( double s, double t, int patch ) {
 		// TODO: Objective 2: Evaluate the surface positions (as opposed to the zero vector)
-		
-		
-		return new Vector3d();
+		Vector3d result = new Vector3d();
+		for (int i = 0; i < 4; ++i) {
+			for (int j = 0; j < 4; ++j) {
+				double poly_i = bernsteinPoly(i, 3, s);
+				double poly_j = bernsteinPoly(j, 3, t);
+				result.x += poly_i * poly_j * coordinatePatch[patch][0].getElement(i,j);
+				result.y += poly_i * poly_j * coordinatePatch[patch][1].getElement(i,j);
+				result.z += poly_i * poly_j * coordinatePatch[patch][2].getElement(i,j);
+			}
+		}
+
+		return result;
 	}
 	
 	/**
