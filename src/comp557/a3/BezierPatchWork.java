@@ -313,11 +313,26 @@ public class BezierPatchWork {
 	}
 
 
-	private Vector3d evalBezierCurve(Vector3d[] v, double t) {
+	private Vector3d evalBezierDeriv(Vector3d[] v, double t) {
+		assert(v.length == 4);
 		v[0].scale(-3 * (1 - t) * (1 - t));
 		v[1].scale(3 * (1 - t) * (1 - t) - 6 * t * (1 - t));
 		v[2].scale(6 * t * (1 - t) - 3 * t * t);
 		v[3].scale(3 * t * t);
+		Vector3d result = new Vector3d();
+		result.add(v[0]);
+		result.add(v[1]);
+		result.add(v[2]);
+		result.add(v[3]);
+		return result;
+	}
+
+	private Vector3d evalBezierCurve(Vector3d[] v, double t) {
+		assert(v.length == 4);
+		v[0].scale((1 - t) * (1 - t) * (1 - t));
+		v[1].scale(3 * t * (1 - t) * (1 - t));
+		v[2].scale(3 * t * t * (1 - t));
+		v[3].scale(t * t * t);
 		Vector3d result = new Vector3d();
 		result.add(v[0]);
 		result.add(v[1]);
@@ -341,7 +356,7 @@ public class BezierPatchWork {
 			}
 			curveS[i] = evalBezierCurve(tmp, t);
 		}
-		return evalBezierCurve(curveS, s);
+		return evalBezierDeriv(curveS, s);
 	}
 	/**
 	 *  differentiates the Bezier mesh along the parametric 't' direction
@@ -359,8 +374,7 @@ public class BezierPatchWork {
 			}
 			curveT[i] = evalBezierCurve(tmp, s);
 		}
-		return evalBezierCurve(curveT, t);
-
+		return evalBezierDeriv(curveT, t);
 	}
 	
 	
@@ -369,6 +383,10 @@ public class BezierPatchWork {
 	 */
 	private Vector3d evalNormal(double s, double t, int patch) {
 		// TODO: Objective 4,5: compute the normal, and make sure the normal is always well defined!
+
+		if (s == 0.00) {
+			s = 1;
+		}
 		Vector3d norm = new Vector3d();
 		norm.cross(differentiateS(s,t,patch), differentiateT(s,t,patch));
 		return norm;
