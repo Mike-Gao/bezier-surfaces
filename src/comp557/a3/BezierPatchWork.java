@@ -313,68 +313,72 @@ public class BezierPatchWork {
 	}
 
 
-	private Vector3d evalBezierDeriv(Vector3d[] v, double t) {
-		assert(v.length == 4);
-		v[0].scale(-3 * (1 - t) * (1 - t));
-		v[1].scale(3 * (1 - t) * (1 - t) - 6 * t * (1 - t));
-		v[2].scale(6 * t * (1 - t) - 3 * t * t);
-		v[3].scale(3 * t * t);
-		Vector3d result = new Vector3d();
-		result.add(v[0]);
-		result.add(v[1]);
-		result.add(v[2]);
-		result.add(v[3]);
-		return result;
+	private double evalBezierDeriv(int i, double t) {
+		assert (-1 < i && i < 4);
+		switch(i) {
+			case 0:
+				return -3 * (1 - t) * (1 - t);
+			case 1:
+				return 3 * (1 - t) * (1 - t) - 6 * t * (1 - t);
+			case 2:
+				return 6 * t * (1 - t) - 3 * t * t;
+			case 3:
+				return 3 * t * t;
+		}
+		throw new IllegalArgumentException();
 	}
 
-	private Vector3d evalBezierCurve(Vector3d[] v, double t) {
-		assert(v.length == 4);
-		v[0].scale((1 - t) * (1 - t) * (1 - t));
-		v[1].scale(3 * t * (1 - t) * (1 - t));
-		v[2].scale(3 * t * t * (1 - t));
-		v[3].scale(t * t * t);
-		Vector3d result = new Vector3d();
-		result.add(v[0]);
-		result.add(v[1]);
-		result.add(v[2]);
-		result.add(v[3]);
-		return result;
+	private double evalBezierCurve(int i, double t) {
+		assert (-1 < i && i < 4);
+		switch(i) {
+			case 0:
+				return (1 - t) * (1 - t) * (1 - t);
+			case 1:
+				return 3 * t * (1 - t) * (1 - t);
+			case 2:
+				return 3 * t * t * (1 - t);
+			case 3:
+				return t * t * t;
+		}
+		throw new IllegalArgumentException();
 	}
 	/**
 	 *  differentiates the Bezier mesh along the parametric 's' direction
 	 */
 	private Vector3d differentiateS(double s,double t,int patch) {
 		// TODO: Objective 3: Evaluate the surface derivative in the s direction
-		Vector3d[] curveS = new Vector3d[4];
+		Vector3d tangentS = new Vector3d();
+		Vector3d cur = new Vector3d();
 		for (int i = 0; i < 4; ++i) {
-			Vector3d[] tmp = new Vector3d[4];
 			for (int j = 0; j < 4; ++j) {
-				tmp[j] = new Vector3d();
-				tmp[j].x = coordinatePatch[patch][0].getElement(i,j);
-				tmp[j].y = coordinatePatch[patch][1].getElement(i,j);
-				tmp[j].z = coordinatePatch[patch][2].getElement(i,j);
+				cur.x = coordinatePatch[patch][0].getElement(i,j);
+				cur.y = coordinatePatch[patch][1].getElement(i,j);
+				cur.z = coordinatePatch[patch][2].getElement(i,j);
+				cur.scale(evalBezierCurve(j, t));
+				cur.scale(evalBezierDeriv(i, s));
+				tangentS.add(cur);
 			}
-			curveS[i] = evalBezierCurve(tmp, t);
 		}
-		return evalBezierDeriv(curveS, s);
+		return tangentS;
 	}
 	/**
 	 *  differentiates the Bezier mesh along the parametric 't' direction
 	 */
 	private Vector3d differentiateT(double s,double t,int patch) {
 		// TODO: Objective 3: Evaluate the surface derivative in the t direction
-		Vector3d[] curveT = new Vector3d[4];
+		Vector3d tangentT = new Vector3d();
+		Vector3d cur = new Vector3d();
 		for (int i = 0; i < 4; ++i) {
-			Vector3d[] tmp = new Vector3d[4];
 			for (int j = 0; j < 4; ++j) {
-				tmp[j] = new Vector3d();
-				tmp[j].x = coordinatePatch[patch][0].getElement(i,j);
-				tmp[j].y = coordinatePatch[patch][1].getElement(i,j);
-				tmp[j].z = coordinatePatch[patch][2].getElement(i,j);
+				cur.x = coordinatePatch[patch][0].getElement(i,j);
+				cur.y = coordinatePatch[patch][1].getElement(i,j);
+				cur.z = coordinatePatch[patch][2].getElement(i,j);
+				cur.scale(evalBezierDeriv(j, t));
+				cur.scale(evalBezierCurve(i, s));
+				tangentT.add(cur);
 			}
-			curveT[i] = evalBezierCurve(tmp, s);
 		}
-		return evalBezierDeriv(curveT, t);
+		return tangentT;
 	}
 	
 	
@@ -389,6 +393,7 @@ public class BezierPatchWork {
 		}
 		Vector3d norm = new Vector3d();
 		norm.cross(differentiateS(s,t,patch), differentiateT(s,t,patch));
+		norm.normalize();
 		return norm;
 	}
 }
